@@ -9,4 +9,9 @@ ip link set dev eth1 up
 cp shared/resolv.conf /etc/resolv.conf 
 cp shared/hosts /etc/hosts
 
-
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+iptables -A FORWARD -p tcp --sport 25 -s 192.168.0.1 -d 192.168.16.0/20 -j ACCEPT
+iptables -A FORWARD -p tcp --sport 1234 -s 192.168.16.0/20 -d 172.12.150.1 -j ACCEPT
+iptables -A FORWARD -p tcp --sport 22 -s 192.168.16.0/20 -d 172.12.150.1 -j ACCEPT
