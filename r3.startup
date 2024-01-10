@@ -17,7 +17,7 @@ cp shared/sources.list /etc/apt/sources.list
 mkdir tests
 cp shared/npings/installs.bat /tests/installs
 chmod +x /tests/installs
-cp shared/npings/r0_tests.bat /tests/test
+cp shared/npings/r3_tests.bat /tests/test
 chmod +x /tests/test
 
 echo "=== setting up iptables ==="

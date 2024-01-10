@@ -14,6 +14,12 @@ cp shared/resolv.conf /etc/resolv.conf
 cp shared/hosts /etc/hosts
 cp shared/sources.list /etc/apt/sources.list
 
+mkdir tests
+cp shared/npings/installs.bat /tests/installs
+chmod +x /tests/installs
+cp shared/npings/r2_tests.bat /tests/test
+chmod +x /tests/test
+
 echo "=== setting up iptables ==="
 
 iptables -P INPUT DROP
