@@ -1,6 +1,6 @@
-ip address add 172.16.0.1/16 dev eth0
-
 echo "=== setting up networking ==="
+
+ip address add 172.16.0.1/16 dev eth0
 
 ip route add 192.168.16.0/20 via 172.16.0.2 dev eth0
 ip route add 192.16.32.0/20 via 172.16.0.3 dev eth0
@@ -9,9 +9,17 @@ ip route add 172.12.150.0/24 via 172.16.0.5 dev eth0
 
 ip link set dev eth0 up
 
+echo "=== copying files ==="
+
 cp shared/resolv.conf /etc/resolv.conf
 cp shared/hosts /etc/hosts
 cp shared/sources.list /etc/apt/sources.list
+
+mkdir tests
+cp shared/npings/installs.bat /tests/installs
+chmod +x /tests/installs
+cp shared/npings/r0_tests.bat /tests/test
+chmod +x /tests/test
 
 echo "=== setting up iptables ==="
 
@@ -21,15 +29,6 @@ iptables -P INPUT DROP
 iptables -P OUTPUT DROP
 iptables -P FORWARD DROP
 
-iptables -A OUTPUT -d 8.8.8.8 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
-iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
-
-iptables -I INPUT -p tcp --sport 80 -j ACCEPT
-iptables -A INPUT -p tcp --sport 443 -j ACCEPT
-iptables -I INPUT -p udp --sport 53 -j ACCEPT
-
 iptables -A OUTPUT -p tcp --sport 1234 -j ACCEPT
 iptables -A OUTPUT -p tcp --sport 25 -j ACCEPT
 iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
@@ -37,14 +36,3 @@ iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
 iptables -A INPUT -p tcp --sport 1234 -j ACCEPT
 iptables -A INPUT -p tcp --sport 25 -s 192.168.0.1 -j ACCEPT
 iptables -A INPUT -p tcp --sport 22 -j ACCEPT
-
-echo "=== updating package list ==="
-apt update > /etc/bin
-
-echo "=== installing nmap ==="
-apt install nmap -y > /etc/bin
-
-wait
-
-echo "=== installations finished ==="
-echo | nmap -v

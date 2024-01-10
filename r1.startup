@@ -1,3 +1,5 @@
+echo "=== setting up networking ==="
+
 ip address add 172.16.0.2/16 dev eth0
 ip address add 192.168.31.254/20 dev eth1
 
@@ -6,26 +8,24 @@ ip route add default via 172.16.0.1
 ip link set dev eth0 up
 ip link set dev eth1 up
 
+echo "=== copying files ==="
+
 cp shared/resolv.conf /etc/resolv.conf 
 cp shared/hosts /etc/hosts
 cp shared/sources.list /etc/apt/sources.list
+
+mkdir tests
+cp shared/npings/installs.bat /tests/installs
+chmod +x /tests/installs
+cp shared/npings/r0_tests.bat /tests/test
+chmod +x /tests/test
+
+echo "=== setting up iptables ==="
 
 iptables -P INPUT DROP
 iptables -P OUTPUT DROP
 iptables -P FORWARD DROP
 
-iptables -A OUTPUT -d 8.8.8.8 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
-iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
-iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
-
-iptables -I INPUT -p tcp --sport 80 -j ACCEPT
-iptables -A INPUT -p tcp --sport 443 -j ACCEPT
-iptables -I INPUT -p udp --sport 53 -j ACCEPT
-
 iptables -A FORWARD -p tcp --sport 25 -s 192.168.0.1 -d 192.168.16.0/20 -j ACCEPT
 iptables -A FORWARD -p tcp --sport 1234 -s 192.168.16.0/20 -d 172.12.150.1 -j ACCEPT
 iptables -A FORWARD -p tcp --sport 22 -s 192.168.16.0/20 -d 172.12.150.1 -j ACCEPT
-
-apt update
-apt install nmap -y
