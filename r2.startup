@@ -20,7 +20,7 @@ iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
 iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
 
 iptables -I INPUT -p tcp --sport 80 -j ACCEPT
-iptables -A INPUT -p tcp --sport 443 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
 iptables -I INPUT -p udp --sport 53 -j ACCEPT
 
 iptables -A FORWARD -p tcp --sport 25 -s 192.168.0.1 -d 192.168.32.0/20 -j ACCEPT
