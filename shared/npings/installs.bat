@@ -1,4 +1,4 @@
-echo "setting up iptables to allow npings"
+echo -e "\033[0;33m========= Setting up iptables to installing allow installing nmap =========\033[0;0m"
 
 iptables -A OUTPUT -d 8.8.8.8 -j ACCEPT
 iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
@@ -9,13 +9,29 @@ iptables -I INPUT -p tcp --sport 80 -j ACCEPT
 iptables -A INPUT -p tcp --sport 443 -j ACCEPT
 iptables -I INPUT -p udp --sport 53 -j ACCEPT
 
-echo "updating libraries"
+echo -e "\033[0;32m========= Done =========\033[0;0m"
+
+echo -e "\033[0;33m========= Updating libraries =========\033[0;0m"
+
 apt update
 
-echo "installing nmap"
+echo -e "\033[0;32m========= Done =========\033[0;0m"
+
+echo -e "\033[0;33m========= Installing nmap =========\033[0;0m"
+
 apt install nmap -y
 
-echo "installations finished"
-nmap -v
+echo -e "\033[0;32m========= Done =========\033[0;0m"
 
-echo "nmap installed"
+echo -e "\033[0;33m========= Removing iptables that allowed installing npings =========\033[0;0m"
+
+iptables -A OUTPUT -d 8.8.8.8 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+
+iptables -I INPUT -p tcp --sport 80 -j ACCEPT
+iptables -A INPUT -p tcp --sport 443 -j ACCEPT
+iptables -I INPUT -p udp --sport 53 -j ACCEPT
+
+echo -e "\033[0;32m========= Done =========\033[0;0m"
