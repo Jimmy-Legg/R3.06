@@ -1,0 +1,62 @@
+echo "=== setting up networking ==="
+
+ip address add 172.16.0.5/16 dev eth0
+ip address add 172.12.150.254/24 dev eth1
+
+ip link set dev eth0 up
+ip link set dev eth1 up 
+
+ip route add default via 172.16.0.1
+
+echo "=== copying files ==="
+
+cp shared/resolv.conf /etc/resolv.conf
+cp shared/hosts /etc/hosts
+
+echo "=== setting up iptables ==="
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+
+iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 172.16.0.1 --sport 1234 -d 172.12.150.1 --dport 1234 -j ACCEPT
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 1234 -d 172.16.0.1 --dport 1234 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 25 -d 192.168.1.1 --dport 25 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.168.1.1 --sport 25 -d 172.12.150.1 --dport 25 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 1234 -d 192.168.16.0/20 --dport 1234 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.168.16.0/20 --sport 1234 -d 172.12.150.1 --dport 1234 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 1234 -d 192.16.32.0/20 --dport 1234 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.16.32.0/20 --sport 1234 -d 172.12.150.1 --dport 1234 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 192.168.1.0/20 --sport 1234 -d 172.12.150.1 --dport 1234 -j ACCEPT
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 1234 -d 192.168.1.0/20 --dport 1234 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 192.168.16.0/20 --sport 22 -d 172.12.150.1 --dport 22 -j ACCEPT
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 22 -d 192.168.16.0/20 --dport 22 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 192.16.32.0/20 --sport 22 -d 172.12.150.1 --dport 22 -j ACCEPT
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 22 -d 192.16.32.0/20 --dport 22 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 22 -d 192.16.32.0/20 --dport 22 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.16.32.0/20 --sport 22 -d 172.12.150.1 --dport 22 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 172.16.0.1 --sport 22 -d 172.12.150.1 --dport 22 -j ACCEPT
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 22 -d 172.16.0.1 --dport 22 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 22 -d 192.168.32.0/20 --dport 22 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.168.32.0/20 --sport 22 -d 172.12.150.1 --dport 22 -j ACCEPT
+
+iptables -A FORWARD -p tcp -s 172.12.150.1 --sport 1234 -d 192.168.32.0/20 --dport 1234 -j ACCEPT
+iptables -A FORWARD -p tcp -s 192.168.32.0/20 --sport 1234 -d 172.12.150.1 --dport 1234 -j ACCEPT
+
+#Pour que les machines puissent installer nmap
+iptables -A FORWARD -d 8.8.8.8 -j ACCEPT
+iptables -A FORWARD -p tcp -m multiport --dports 80,443 -j ACCEPT
+iptables -A FORWARD -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -p tcp -m multiport --sports 80,443 -j ACCEPT
+iptables -A FORWARD -p udp --sport 53 -j ACCEPT
