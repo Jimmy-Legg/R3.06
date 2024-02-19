@@ -1,0 +1,55 @@
+echo -e "\033[0;33m========= Setting up networking =========\033[0;0m"
+
+ip address add 172.16.0.1/16 dev eth0
+
+ip route add 192.168.16.0/20 via 172.16.0.2 dev eth0
+ip route add 192.16.32.0/20 via 172.16.0.3 dev eth0
+ip route add 192.168.1.0/26 via 172.16.0.4 dev eth0
+ip route add 172.12.150.0/24 via 172.16.0.5 dev eth0
+ip route add 192.168.32.0/20 via 172.16.0.6 dev eth0
+
+ip link set dev eth0 up
+
+echo -e "\033[0;32m========= Done =========\033[0;0m"
+
+echo -e "\033[0;33m========= Copying files =========\033[0;0m"
+
+cp shared/resolv.conf /etc/resolv.conf
+cp shared/hosts /etc/hosts
+
+mkdir tests
+cp shared/npings/routers/open_forwarding_installation_iptables.bat /tests/open_installs
+chmod +x /tests/open_installs
+cp shared/npings/routers/close_forwarding_installation_iptables.bat /tests/close_installs
+chmod +x /tests/close_installs
+
+echo -e "\033[0;32m========= Done =========\033[0;0m"
+
+echo -e "\033[0;33m========= Setting up iptables =========\033[0;0m"
+
+iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+
+iptables -A INPUT -p icmp -s 172.12.150.1 -j ACCEPT
+iptables -A OUTPUT -p icmp -d 172.12.150.1 -j ACCEPT
+
+iptables -A OUTPUT -p tcp -m multiport --dport 80,443 -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p udp --dport 53 -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p icmp -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+
+iptables -A INPUT -p tcp -m multiport --sport 80,443 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p udp --sport 53 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p icmp -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+
+iptables -A FORWARD -p tcp -m multiport --dport 80,443 -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -p udp --dport 53 -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -p tcp -m multiport - -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -p udp --sport 53 -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -p icmp -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+
+echo -e "\033[0;32m========= Done =========\033[0;0m"
+
+./tests/open_installs
