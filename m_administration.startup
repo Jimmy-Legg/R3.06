@@ -11,5 +11,7 @@ cp shared/sources.list /etc/apt/sources.list
 mkdir tests
 cp shared/npings/installs.bat /tests/installs
 chmod +x /tests/installs
-cp shared/npings/m_administration_npings.bat /tests/npings
+cp shared/npings/r2/m_administration_npings.bat /tests/npings
 chmod +x /tests/npings
+cp shared/npings/r2/m_administration_test.bat /tests/test
+chmod +x /tests/test
